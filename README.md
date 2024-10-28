@@ -52,7 +52,7 @@ This application predicts the likelihood of a dengue outbreak based on weather c
 - **static/style.css**: Basic styling for the web app.
 
 ## Screenshots
-(Dengue.png)
+![Dengue Prediction](Dengue.png)
 
 
 
