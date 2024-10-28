@@ -1,7 +1,3 @@
-Here's a README template for your Dengue Prediction Flask app that integrates real-time weather data and Folium maps. This README is structured to help others understand, set up, and run your project on GitHub.
-
----
-
 # Dengue Outbreak Prediction App 🌦️🦟
 
 This application predicts the likelihood of a dengue outbreak based on weather conditions using a pre-trained model and real-time weather data. The app visualizes predictions on an interactive map of India.
@@ -56,6 +52,7 @@ This application predicts the likelihood of a dengue outbreak based on weather c
 - **static/style.css**: Basic styling for the web app.
 
 ## Screenshots
+(Dengue.png)
 
 
 
