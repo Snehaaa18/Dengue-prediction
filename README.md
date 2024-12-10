@@ -1,4 +1,4 @@
-# Dengue Outbreak Prediction App 🌦️🦟
+# Dengue Outbreak Prediction 🌦️🦟<Flask/Javascript>
 
 This application predicts the likelihood of a dengue outbreak based on weather conditions using a pre-trained model and real-time weather data. The app visualizes predictions on an interactive map of India.
 
@@ -59,7 +59,43 @@ This application predicts the likelihood of a dengue outbreak based on weather c
 ## Contributing
 
 Feel free to open issues, contribute, or suggest improvements!
+Dengue Outbreak Prediction 🌦️🦟 <Flask/Javascript>
+This application predicts the likelihood of a dengue outbreak based on weather conditions using a pre-trained model and real-time weather data. The app visualizes predictions on an interactive map of India.
 
----
 
-Let me know if you want any specific sections or details added!
+🚀 Getting Started
+Open Using Daytona
+Install Daytona: Follow the Daytona installation guide.
+
+Create the Workspace:
+
+bash
+daytona create https://github.com/yourusername/dengue-prediction-app.git
+Setup Instructions
+Prerequisites
+Python 3.6+
+
+Joblib, Flask, Requests, Folium libraries
+
+Installation
+Clone the repository:
+
+bash
+git clone https://github.com/yourusername/dengue-prediction-app.git
+cd dengue-prediction-app
+Install dependencies:
+
+bash
+pip install -r requirements.txt
+Add OpenWeather API Key: Replace API_KEY in app.py with your OpenWeather API key.
+
+Place the ML model file: Make sure dengue_model.pkl is in the specified directory or update the path in app.py.
+
+Start the Application:
+bash
+python app.py
+```
+
+
+
+
