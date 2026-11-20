@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengue Outbreak Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Dengue Outbreak Prediction</h1>
+    </header>
+
+    <main class="container">
+        <section class="form-card">
+            <form id="predictionForm" action="/predict" method="POST" class="prediction-form">
+                <div class="form-group">
+                    <label for="temperature">Temperature:</label>
+                    <input type="number" step="any" id="temperature" name="temperature" 
+                           placeholder="e.g. 28.5 °C" value="{{ request_values.temperature if request_values else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="humidity">Humidity:</label>
+                    <input type="number" step="any" id="humidity" name="humidity" 
+                           placeholder="e.g. 80 %" value="{{ request_values.humidity if request_values else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rainfall">Rainfall:</label>
+                    <input type="number" step="any" id="rainfall" name="rainfall" 
+                           placeholder="e.g. 15.0 mm" value="{{ request_values.rainfall if request_values else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="wind">Wind:</label>
+                    <input type="number" step="any" id="wind" name="wind" 
+                           placeholder="e.g. 4.2 km/h" value="{{ request_values.wind if request_values else '' }}" required>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" id="predictBtn" class="btn-predict">Predict</button>
+                </div>
+            </form>
+
+            <div id="resultBox" class="result-box {% if prediction_text %}{{ 'result-high' if 'High' in prediction_text or 'Outbreak' in prediction_text else 'result-low' }}{% else %}hidden{% endif %}">
+                {{ prediction_text if prediction_text else '' }}
+            </div>
+        </section>
+
+        <section class="map-card">
+            <h2>Real-Time Dengue Prone Areas in India</h2>
+            <div class="map-wrapper">
+                {{ map_html | safe }}
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-color legend-high"></span>
+                    <span>High Risk / Dengue Prone Zone</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-low"></span>
+                    <span>Low Risk Zone</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; Dengue Outbreak Prediction System. Data powered by OpenWeather API &amp; Machine Learning.</p>
+    </footer>
+
+    <script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Prevent standard page refresh
+
+        const btn = document.getElementById('predictBtn');
+        const resultBox = document.getElementById('resultBox');
+        
+        btn.disabled = true;
+        btn.textContent = 'Calculating...';
+
+        const payload = {
+            temperature: document.getElementById('temperature').value,
+            humidity: document.getElementById('humidity').value,
+            rainfall: document.getElementById('rainfall').value,
+            wind: document.getElementById('wind').value
+        };
+
+        try {
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                resultBox.className = 'result-box ' + (data.is_high_risk ? 'result-high' : 'result-low');
+                resultBox.textContent = data.prediction_text;
+            } else {
+                resultBox.className = 'result-box result-high';
+                resultBox.textContent = data.error || 'Failed to calculate prediction.';
+            }
+        } catch (err) {
+            resultBox.className = 'result-box result-high';
+            resultBox.textContent = 'Network or server error occurred: ' + err.message;
+        } finally {
+            resultBox.classList.remove('hidden');
+            btn.disabled = false;
+            btn.textContent = 'Predict';
+        }
+    });
+    </script>
+</body>
+</html>
