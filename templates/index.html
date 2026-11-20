@@ -13,29 +13,47 @@
 
     <main class="container">
         <section class="form-card">
-            <form id="predictionForm" action="/predict" method="POST" class="prediction-form">
+            <!-- Quick Fill Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <label for="citySelect">Quick-Fill City:</label>
+                    <select id="citySelect">
+                        <option value="">-- Choose City --</option>
+                        {% for city in cities %}
+                        <option value="{{ city.name }}">{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="toolbar-divider">or</div>
+                <button type="button" id="geoBtn" class="btn-geo">
+                    📍 Use My Location
+                </button>
+            </div>
+            <div id="statusNotice" class="status-notice hidden"></div>
+
+            <form id="predictionForm" class="prediction-form">
                 <div class="form-group">
-                    <label for="temperature">Temperature:</label>
+                    <label for="temperature">Temperature (°C):</label>
                     <input type="number" step="any" id="temperature" name="temperature" 
-                           placeholder="e.g. 28.5 °C" value="{{ request_values.temperature if request_values else '' }}" required>
+                           placeholder="e.g. 28.5" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="humidity">Humidity:</label>
+                    <label for="humidity">Humidity (%):</label>
                     <input type="number" step="any" id="humidity" name="humidity" 
-                           placeholder="e.g. 80 %" value="{{ request_values.humidity if request_values else '' }}" required>
+                           placeholder="e.g. 80" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="rainfall">Rainfall:</label>
+                    <label for="rainfall">Rainfall (mm):</label>
                     <input type="number" step="any" id="rainfall" name="rainfall" 
-                           placeholder="e.g. 15.0 mm" value="{{ request_values.rainfall if request_values else '' }}" required>
+                           placeholder="e.g. 15.0" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="wind">Wind:</label>
+                    <label for="wind">Wind (km/h):</label>
                     <input type="number" step="any" id="wind" name="wind" 
-                           placeholder="e.g. 4.2 km/h" value="{{ request_values.wind if request_values else '' }}" required>
+                           placeholder="e.g. 4.2" required>
                 </div>
 
                 <div class="btn-container">
@@ -43,36 +61,115 @@
                 </div>
             </form>
 
-            <div id="resultBox" class="result-box {% if prediction_text %}{{ 'result-high' if 'High' in prediction_text or 'Outbreak' in prediction_text else 'result-low' }}{% else %}hidden{% endif %}">
-                {{ prediction_text if prediction_text else '' }}
-            </div>
+            <div id="resultBox" class="result-box hidden"></div>
         </section>
 
         <section class="map-card">
-            <h2>Real-Time Dengue Prone Areas in India</h2>
+            <h2>Real-Time Dengue Prone Areas &amp; Outbreak HeatMap</h2>
             <div class="map-wrapper">
                 {{ map_html | safe }}
             </div>
             <div class="legend">
                 <div class="legend-item">
                     <span class="legend-color legend-high"></span>
-                    <span>High Risk / Dengue Prone Zone</span>
+                    <span>High Risk Marker</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color legend-low"></span>
-                    <span>Low Risk Zone</span>
+                    <span>Low Risk Marker</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-gradient"></span>
+                    <span>HeatMap (Low &rarr; Severe Outbreak Density)</span>
                 </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; Dengue Outbreak Prediction System. Data powered by OpenWeather API &amp; Machine Learning.</p>
+        <p>&copy; Dengue Outbreak Prediction System. Powered by OpenWeather API, Folium HeatMap &amp; Machine Learning.</p>
     </footer>
 
     <script>
+    const statusNotice = document.getElementById('statusNotice');
+
+    function showStatus(text, isError = false) {
+        statusNotice.textContent = text;
+        statusNotice.className = 'status-notice ' + (isError ? 'status-error' : 'status-info');
+        statusNotice.classList.remove('hidden');
+        setTimeout(() => {
+            statusNotice.classList.add('hidden');
+        }, 4000);
+    }
+
+    function populateWeatherInputs(data) {
+        document.getElementById('temperature').value = data.temperature;
+        document.getElementById('humidity').value = data.humidity;
+        document.getElementById('rainfall').value = data.rainfall;
+        document.getElementById('wind').value = data.wind;
+    }
+
+    // City Dropdown Auto-Fill
+    document.getElementById('citySelect').addEventListener('change', async function() {
+        const city = this.value;
+        if (!city) return;
+        
+        showStatus(`Fetching weather for ${city}...`);
+        try {
+            const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+            const data = await res.json();
+            if (data.success) {
+                populateWeatherInputs(data);
+                showStatus(`Populated current weather for ${city}!`);
+            } else {
+                showStatus(data.error || 'Failed to fetch weather', true);
+            }
+        } catch (e) {
+            showStatus('Error contacting weather service', true);
+        }
+    });
+
+    // Browser Geolocation Auto-Fill
+    document.getElementById('geoBtn').addEventListener('click', function() {
+        if (!navigator.geolocation) {
+            showStatus('Geolocation is not supported by your browser.', true);
+            return;
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        showStatus('Locating your position...');
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                try {
+                    const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        populateWeatherInputs(data);
+                        showStatus('Successfully retrieved weather for your coordinates!');
+                    } else {
+                        showStatus('Failed to retrieve weather for location.', true);
+                    }
+                } catch (e) {
+                    showStatus('Error retrieving weather data.', true);
+                } finally {
+                    btn.disabled = false;
+                }
+            },
+            (err) => {
+                showStatus('Location access denied or unavailable.', true);
+                btn.disabled = false;
+            },
+            { timeout: 10000 }
+        );
+    });
+
+    // Asynchronous Form Prediction
     document.getElementById('predictionForm').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Prevent standard page refresh
+        event.preventDefault();
 
         const btn = document.getElementById('predictBtn');
         const resultBox = document.getElementById('resultBox');
@@ -108,7 +205,7 @@
             }
         } catch (err) {
             resultBox.className = 'result-box result-high';
-            resultBox.textContent = 'Network or server error occurred: ' + err.message;
+            resultBox.textContent = 'Network or server error: ' + err.message;
         } finally {
             resultBox.classList.remove('hidden');
             btn.disabled = false;

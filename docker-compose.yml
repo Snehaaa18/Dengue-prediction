@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  dengue-prediction-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dengue_prediction_service
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-YOUR_OPENWEATHER_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      # Optional: mount model or code for live reload during local testing
+      - ./dengue_model.pkl:/app/dengue_model.pkl:ro

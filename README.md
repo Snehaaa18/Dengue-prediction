@@ -1,89 +1,102 @@
-# Dengue Outbreak Prediction 🌦️🦟<Python/Flask>
+# Dengue Outbreak Prediction 🌦️🦟 <Python/Flask>
 
-This application predicts the likelihood of a dengue outbreak based on weather conditions using a pre-trained model and real-time weather data. The app visualizes predictions on an interactive map of India.
+This application predicts the likelihood of a dengue outbreak based on meteorological conditions using a pre-trained machine learning model and real-time weather data. The app visualizes predictions and regional risk gradients on an interactive map of India with Folium HeatMaps.
 
 ## Features
 
-- **User Inputs**: Temperature, Humidity, Rainfall, and Wind data.
-- **Map Integration**: India map visualization with color-coded dengue prediction zones.
-- **Real-Time Weather Data**: Uses OpenWeather API to fetch live data.
-- **Prediction Model**: Machine learning model trained to predict dengue likelihood.
+- **Asynchronous Instant Predictions**: Fast JSON `/api/predict` endpoint without full-page reloads.
+- **One-Click Weather Auto-Fill**:
+  - **Quick-Fill City Dropdown**: Instantly retrieves live weather for 16 major Indian metropolitan cities.
+  - **📍 Use My Location**: Uses HTML5 Geolocation to fetch live weather at the user's GPS coordinates.
+- **Folium Interactive Map & HeatMap**:
+  - Color-coded city markers (Green for Low Risk, Red for Dengue Prone).
+  - Outbreak density HeatMap layer with interactive layer toggling.
+- **In-Memory Caching (`Flask-Caching`)**: Caches OpenWeather API queries for 30 minutes to stay within free-tier rate limits and speed up page load times to <30ms.
+- **Production-Ready**: Dockerized with multi-worker Gunicorn WSGI and environment configuration.
 
-## Setup Instructions
+---
+
+## 🚀 Quick Start with Docker (Recommended)
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/dengue-prediction-app.git
+   cd dengue-prediction-app
+   ```
+
+2. **Configure Environment Variables**:
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and set your `OPENWEATHER_API_KEY`.
+
+3. **Launch with Docker Compose**:
+   ```bash
+   docker-compose up --build -d
+   ```
+   Open your browser at `http://localhost:5000/`.
+
+---
+
+## 💻 Local Setup (Without Docker)
 
 ### Prerequisites
-
-- **Python 3.6+**
-- **Joblib, Flask, Requests, Folium** libraries
+- Python 3.8+
+- Active OpenWeather API key (optional; fallback regional simulation is included)
 
 ### Installation
 
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/yourusername/dengue-prediction-app.git
-    cd dengue-prediction-app
-    ```
-
-2. **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. **Add OpenWeather API Key**:
-   Replace `API_KEY` in `app.py` with your OpenWeather API key.
-
-4. **Place the ML model file**:
-   Make sure `dengue_model.pkl` is in the specified directory or update the path in `app.py`.
-
-### Usage
-
-1. **Run the Flask App**:
-    ```bash
-    python app.py
-    ```
-
-2. **Open in Browser**:
-   Navigate to `http://127.0.0.1:5000/` to access the app.
-
-   Here's the updated section for your GitHub README:
-
-## 🚀 Getting Started  
-
-### Open Using Daytona  
-
-1. **Install Daytona**: Follow the [Daytona installation guide](https://www.daytona.io/docs/installation/installation/).  
-2. **Create the Workspace**:  
-   ```bash  
-   daytona create <SAMPLE_REPO_URL> 
-   ```  
-3. **Install Dependencies**:  
-   Follow the setup instructions in the main README to install the required dependencies.
-4. **Start the Application**:  
-   ```bash  
-   python app.py  
+1. **Create and activate a virtual environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Files
+3. **Configure Environment**:
+   ```bash
+   cp .env.example .env
+   ```
 
-- **app.py**: Main Flask application file.
-- **templates/index.html**: HTML template with prediction form and map.
-- **static/style.css**: Basic styling for the web app.
-- **dengue_model.pkl**: Pre-trained machine learning model file.
-- **requirements.txt**: List of dependencies required for the project.
+4. **Run the Application**:
+   ```bash
+   python app.py
+   ```
+   Access the app at `http://127.0.0.1:5000/`.
+
+---
 
 ## Screenshots
-![Dengue Prediction](Dengue.png)
+![Dengue Prediction](image.png)
 
+---
 
-
-## Contributing
-
-Feel free to open issues, contribute, or suggest improvements!
-
+## 📁 Project Structure
 
 ```
+├── app.py                # Main Flask web application & API routes
+├── dengue_model.pkl      # Pre-trained machine learning model
+├── requirements.txt      # Python dependencies
+├── Dockerfile            # Container definition (Gunicorn WSGI)
+├── docker-compose.yml    # Multi-container orchestration config
+├── .env.example          # Environment variables template
+├── .env                  # Local environment file (git-ignored)
+├── .gitignore            # Git exclusion rules
+├── .dockerignore         # Docker build exclusion rules
+├── templates/
+│   └── index.html        # Responsive frontend template with AJAX logic
+├── static/
+│   └── style.css         # Styling, buttons, status notices, and legend
+└── image.png             # Application preview screenshot
+```
 
+---
 
+## 🛡️ License & Contributing
 
-
+Feel free to open issues, submit pull requests, or propose new features!

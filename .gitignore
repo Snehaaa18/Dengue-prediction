@@ -1,0 +1,26 @@
+# Environment and sensitive keys
+.env
+.env.local
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Docker build artifacts
+.dockerignore
+
+# IDE and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary inspect files
+inspect_model.py
